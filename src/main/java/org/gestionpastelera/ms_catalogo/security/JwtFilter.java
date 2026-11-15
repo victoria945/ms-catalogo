@@ -1,10 +1,12 @@
 package org.gestionpastelera.ms_catalogo.security;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -37,25 +40,28 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String token = authHeader.substring(7);
         try {
-            if (jwtUtil.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                final String rut = jwtUtil.extractRut(token);
-                final String rol = jwtUtil.extractRol(token);
+            final Claims claims = jwtUtil.extractAllClaims(token);
+            if (jwtUtil.isTokenValid(claims) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                final String rut = jwtUtil.extractRutFromClaims(claims);
+                final String rol = jwtUtil.extractRolFromClaims(claims);
 
-                List<SimpleGrantedAuthority> authorities = Collections.emptyList();
-                if (rol != null && !rol.isBlank()) {
-                    authorities = List.of(new SimpleGrantedAuthority("ROLE_" + rol));
+                if (rut != null && !rut.isBlank()) {
+                    List<SimpleGrantedAuthority> authorities = Collections.emptyList();
+                    if (rol != null && !rol.isBlank()) {
+                        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + rol));
+                    }
+
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            rut,
+                            null,
+                            authorities
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        rut,
-                        null,
-                        authorities
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
-            // Continúa la cadena sin autenticar
+            log.debug("Token JWT inválido o expirado en ms-catalogo: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);

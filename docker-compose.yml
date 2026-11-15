@@ -7,7 +7,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-catalogodb}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
     ports:
-      - "${MYSQL_PORT:-3309}:3306"
+      - "127.0.0.1:${MYSQL_PORT:-3309}:3306"
     volumes:
       - mysql_catalogo_data:/var/lib/mysql
     networks:
@@ -28,6 +28,16 @@ services:
       - "${SERVER_PORT:-8081}:${SERVER_PORT:-8081}"
     env_file:
       - .env
+    environment:
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-}
+      COGNITO_ISSUER_URI: ${COGNITO_ISSUER_URI:-}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${SERVER_PORT:-8081}/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
     depends_on:
       mysql-catalogo:
         condition: service_healthy

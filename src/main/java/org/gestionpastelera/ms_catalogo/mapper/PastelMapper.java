@@ -19,12 +19,16 @@ public interface PastelMapper {
     List<PastelResponse> toResponseList(List<Pastel> pasteles);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "codigoPastel", expression = "java(request.getCodigoPastel() != null ? request.getCodigoPastel().trim() : null)")
+    @Mapping(target = "nombre", expression = "java(request.getNombre() != null ? request.getNombre().trim() : null)")
     @Mapping(target = "activo", constant = "true")
     @Mapping(target = "fechaCreacion", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "fechaActualizacion", expression = "java(java.time.LocalDateTime.now())")
     Pastel toEntity(PastelRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "codigoPastel", expression = "java(request.getCodigoPastel() != null ? request.getCodigoPastel().trim() : null)")
+    @Mapping(target = "nombre", expression = "java(request.getNombre() != null ? request.getNombre().trim() : null)")
     @Mapping(target = "activo", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", expression = "java(java.time.LocalDateTime.now())")

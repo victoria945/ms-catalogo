@@ -57,6 +57,6 @@ public class PastelCacheService {
 
     @CacheEvict(value = "catalogoCache", allEntries = true)
     public void invalidarCache() {
-        // Método para invalidar caché al realizar mutaciones
+        // Limpiar caché tras cambios
     }
 }

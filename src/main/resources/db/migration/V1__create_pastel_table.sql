@@ -14,3 +14,4 @@ CREATE TABLE IF NOT EXISTS pastel (
 );
 
 CREATE INDEX idx_pastel_categoria ON pastel (categoria);
+CREATE INDEX idx_pastel_activo ON pastel (activo);

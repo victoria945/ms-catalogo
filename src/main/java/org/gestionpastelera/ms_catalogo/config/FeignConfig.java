@@ -11,6 +11,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Configuration
 public class FeignConfig {
 
+    // Reenviar token JWT a inventario
     @Bean
     public RequestInterceptor authorizationHeaderForwarder() {
         return requestTemplate -> {

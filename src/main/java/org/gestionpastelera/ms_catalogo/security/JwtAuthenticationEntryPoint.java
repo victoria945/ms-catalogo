@@ -20,12 +20,14 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             AuthenticationException authException
     ) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
+        String safePath = request.getRequestURI() != null ? request.getRequestURI().replace("\"", "\\\"") : "";
         String json = String.format(
                 "{\"timestamp\":\"%s\",\"status\":401,\"error\":\"No autorizado\",\"message\":\"Debe autenticarse con un token JWT válido emitido por ms-auth\",\"path\":\"%s\"}",
                 LocalDateTime.now(),
-                request.getRequestURI()
+                safePath
         );
 
         response.getWriter().write(json);
